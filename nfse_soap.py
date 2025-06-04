@@ -1,7 +1,6 @@
 import os
 from zeep import Client
 
-
 def authenticate() -> str | None:
     url = os.getenv("WSDL_URL")
     user = os.getenv("WSDL_USER")
@@ -21,6 +20,22 @@ def authenticate() -> str | None:
         identificacaoPrestador=user,
         senha=passwd,
     )
+
+def last_batch() -> str | None:
+    url = os.getenv("WSDL_URL")
+    user = os.getenv("WSDL_USER")
+
+    if not url:
+        raise ValueError("WSDL_URL must be set in environment variables.")
+
+    if not user:
+        raise ValueError("WSDL_USER must be set in environment variables.")
+
+    soap_client = Client(url)
+    response = soap_client.service.ConsultarUltimoLote(
+        identificacaoPrestador=user,
+    )
+    return response if response else None
 
 def send_nfse(token: str, xml: str) -> str | None:
     url = os.getenv("WSDL_URL")

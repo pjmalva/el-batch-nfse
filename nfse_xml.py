@@ -1,5 +1,6 @@
 import xml.etree.cElementTree as ET
 from datetime import datetime
+from random import randint
 
 DADOS_PRESTADOR = {
     "cpf_cnpj": "99999999000199",
@@ -27,6 +28,17 @@ DADOS_PRESTADOR = {
     }
 }
 
+def make_hash():
+    random_number = randint(1000000000000, 9999999999999)
+    
+    hash_value = 2166136261
+    for char in str(random_number):
+        hash_value ^= ord(char)
+        hash_value *= 16777619
+        hash_value &= 0xFFFFFFFF
+
+    return str(hash_value)
+
 def create_root(name: str, attributes: dict | None = None) -> ET.Element:
      return ET.Element(name, **attributes if attributes else {})
 
@@ -41,8 +53,8 @@ def add_child(
     return parent
 
 def create_lote_rps(
-    id: str,
     numero_lote: str,
+    numero_rps: str,
     quantidade_rps: int,
     tomador: dict,
     servicos: list,
@@ -59,7 +71,7 @@ def create_lote_rps(
         }   
     )
     
-    root = add_child(root, "Id", id)
+    root = add_child(root, "Id", make_hash())
     root = add_child(root, "NumeroLote", numero_lote)
     root = add_child(root, "QuantidadeRps", str(quantidade_rps))
 
@@ -72,9 +84,9 @@ def create_lote_rps(
 
     create_rps(
         parent=lista_rps,
-        id="0000001",
-        local_prestacao=1,
-        iss_retido=0,
+        numero=numero_rps,
+        local_prestacao=2,
+        iss_retido=1,
         tomador=tomador,
         servicos=servicos,
         valores=valores,
@@ -85,7 +97,7 @@ def create_lote_rps(
 
 def create_rps(
     parent: ET.Element,
-    id: str,
+    numero: str,
     local_prestacao: int,
     iss_retido: int,
     tomador: dict,
@@ -95,15 +107,15 @@ def create_rps(
 ):
     data_emissao = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
 
-    rps = add_child(parent, "Rps")
-    add_child(rps, "Id", id)
+    rps = ET.SubElement(parent, "Rps")
+    add_child(rps, "Id", make_hash())
     add_child(rps, "LocalPrestacao", str(local_prestacao))
     add_child(rps, "IssRetido", str(iss_retido))
     add_child(rps, "DataEmissao", data_emissao)
 
     identificacao_rps = ET.SubElement(rps, "IdentificacaoRps")
-    add_child(identificacao_rps, "Numero", "0000001")
-    add_child(identificacao_rps, "Serie", "1")
+    add_child(identificacao_rps, "Numero", numero)
+    add_child(identificacao_rps, "Serie", "RPS")
     add_child(identificacao_rps, "Tipo", "1")
 
     dados_prestador = ET.SubElement(rps, "DadosPrestador")

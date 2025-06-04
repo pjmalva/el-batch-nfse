@@ -2,7 +2,7 @@ import os
 from xml.etree.ElementTree import tostring
 import xml.etree.cElementTree as ET
 
-from nfse_soap import authenticate, send_nfse
+from nfse_soap import authenticate, last_batch, send_nfse
 from nfse_xml import create_lote_rps
 
 from dotenv import load_dotenv
@@ -64,9 +64,13 @@ valores = {
 observacao = "Observação de teste"
 
 if __name__ == "__main__":
+    ultimo_lote = last_batch()
+
+    print("Último lote:", ultimo_lote)
+
     lote = create_lote_rps(
-        id="1",
         numero_lote="1",
+        numero_rps="1",
         quantidade_rps = 1,
         tomador=tomador,
         servicos=servicos,
