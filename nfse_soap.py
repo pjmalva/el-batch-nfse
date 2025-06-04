@@ -1,21 +1,46 @@
+import os
 from zeep import Client
-from zeep.transports import Transport
 
-WSDL_URL = "https://es-colatina-pm-nfs.cloud.el.com.br/RpsServiceService?wsdl"
-WSDL_USER = "22627105000108"
-WSDL_PASSWORD = "20102016"
 
 def authenticate() -> str | None:
-    soap_client = Client(WSDL_URL)
+    url = os.getenv("WSDL_URL")
+    user = os.getenv("WSDL_USER")
+    passwd = os.getenv("WSDL_PASSWORD")
+
+    if not url:
+        raise ValueError("WSDL_URL must be set in environment variables.")
+
+    if not user:
+        raise ValueError("WSDL_USER must be set in environment variables.")
+
+    if not passwd:
+        raise ValueError("WSDL_PASSWORD must be set in environment variables.")
+
+    soap_client = Client(url)
     return soap_client.service.autenticarContribuinte(
-        identificacaoPrestador=WSDL_USER,
-        senha=WSDL_PASSWORD
+        identificacaoPrestador=user,
+        senha=passwd,
     )
 
 def send_nfse(token: str, xml: str) -> str | None:
-    soap_client = Client(WSDL_URL)
+    url = os.getenv("WSDL_URL")
+    user = os.getenv("WSDL_USER")
+
+    if not url:
+        raise ValueError("WSDL_URL must be set in environment variables.")
+
+    if not user:
+        raise ValueError("WSDL_USER must be set in environment variables.")
+
+    if not token:
+        raise ValueError("Token must be provided for sending NFSe.")
+
+    if not xml:
+        raise ValueError("XML content must be provided for sending NFSe.")
+
+    soap_client = Client(url)
     response = soap_client.service.EnviarLoteRpsEnvio(
-        identificacaoPrestador=WSDL_USER,
+        identificacaoPrestador=user,
         hashIdentificador=token,
         arquivo=xml,
     )

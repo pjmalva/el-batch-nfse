@@ -1,11 +1,14 @@
+import os
 from xml.etree.ElementTree import tostring
 import xml.etree.cElementTree as ET
 
 from nfse_soap import authenticate, send_nfse
 from nfse_xml import create_lote_rps
 
-SAVE_FILE = True
+from dotenv import load_dotenv
 
+load_dotenv('.env.local')
+ 
 tomador = {
     "cpf_cnpj": "999999999999",
     "inscricao_municipal": "999999",
@@ -74,7 +77,7 @@ if __name__ == "__main__":
     if lote is None:
         raise Exception("Failed to create XML")
 
-    if SAVE_FILE:
+    if os.getenv("SAVE_FILE", "false").lower() == "true":
         xml_tree = ET.ElementTree(lote)
         with open("xmls/lote_rps.xml", "wb") as file:
             xml_tree.write(file, encoding="utf-8", xml_declaration=True)
@@ -86,5 +89,5 @@ if __name__ == "__main__":
 
     xml_text = tostring(lote, encoding='utf-8', xml_declaration=True)
 
-    response = send_nfse(auth_token, xml_text)
-    print(response)
+#    response = send_nfse(auth_token, xml_text)
+#    print(response)
